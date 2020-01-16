@@ -39,7 +39,7 @@ REST_FRAMEWORK = {
 * Add serializer path in settings file
 ```pythonstub
 FYLE_REST_AUTH_SERIALIZERS = {
-    'USER_DETAILS_SERIALIZER': 'apps.users.serializers.UserSerializer'
+    'USER_DETAILS_SERIALIZER': 'users.serializers.UserSerializer'
 }
 ```
 
@@ -55,7 +55,7 @@ FYLE_CLIENT_SECRET = '<Fyle Client Secret>'
 ```pythonstub
 urlpatterns = [
     path('api/admin/', admin.site.urls),
-    path('api/auth/', include('apps.fyle_rest_auth.urls')),
+    path('api/auth/', include('fyle_rest_auth.urls')),
     
 ]
 ```
