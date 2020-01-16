@@ -1,8 +1,6 @@
 import json
 import requests
 
-import requests_cache
-
 from django.contrib.auth import get_user_model
 from django.conf import settings
 
@@ -10,8 +8,6 @@ from rest_framework.authentication import BaseAuthentication
 from rest_framework import exceptions
 
 from .models import AuthToken
-
-requests_cache.install_cache('demo_cache', backend='sqlite', expire_after=1200)
 
 User = get_user_model()
 
