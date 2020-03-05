@@ -60,34 +60,38 @@ class LoginView(APIView):
 
             return Response(
                 data=tokens,
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK,
             )
 
-        except UnauthorizedClientError:
+        except UnauthorizedClientError as e:
             return Response(
                 {
-                    'message': 'Invalid Authorization Code'
+                    'message': 'Invalid Authorization Code',
+                    'response': e.response
                 },
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        except NotFoundClientError:
+        except NotFoundClientError as e:
             return Response(
                 {
-                    'message': 'Fyle Application not found'
+                    'message': 'Fyle Application not found',
+                    'response': e.response
                 },
                 status=status.HTTP_404_NOT_FOUND
             )
-        except WrongParamsError:
+        except WrongParamsError as e:
             return Response(
                 {
-                    'message': 'Some of the parameters are wrong'
+                    'message': 'Some of the parameters are wrong',
+                    'response': e.response
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-        except InternalServerError:
+        except InternalServerError as e:
             return Response(
                 {
-                    'message': 'Wrong/Expired Authorization code'
+                    'message': 'Wrong/Expired Authorization code',
+                    'response': e.response
                 },
                 status=status.HTTP_401_UNAUTHORIZED
             )
@@ -139,31 +143,35 @@ class RefreshView(APIView):
                 status=status.HTTP_200_OK
             )
 
-        except UnauthorizedClientError:
+        except UnauthorizedClientError as e:
             return Response(
                 {
-                    'message': 'Invalid Refresh Token'
+                    'message': 'Invalid Refresh Token',
+                    'response': e.response
                 },
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        except NotFoundClientError:
+        except NotFoundClientError as e:
             return Response(
                 {
-                    'message': 'Fyle Application not found'
+                    'message': 'Fyle Application not found',
+                    'response': e.response
                 },
                 status=status.HTTP_404_NOT_FOUND
             )
-        except WrongParamsError:
+        except WrongParamsError as e:
             return Response(
                 {
-                    'message': 'Some of the parameters are wrong'
+                    'message': 'Some of the parameters are wrong',
+                    'response': e.response
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
-        except InternalServerError:
+        except InternalServerError as e:
             return Response(
                 {
-                    'message': 'Something went wrong. Please try again in sometime'
+                    'message': 'Something went wrong. Please try again in sometime',
+                    'response': e.response
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
