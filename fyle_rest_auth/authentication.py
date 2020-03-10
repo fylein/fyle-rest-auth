@@ -1,4 +1,6 @@
 import json
+from typing import Dict
+
 import requests
 
 from django.contrib.auth import get_user_model
@@ -22,10 +24,10 @@ class FyleJWTAuthentication(BaseAuthentication):
         """
         access_token_string = self.get_header(request)
 
-        user_email = self.validate_token(access_token_string=access_token_string)
+        user = self.validate_token(access_token_string=access_token_string)
 
         try:
-            user = User.objects.get(email=user_email)
+            user = User.objects.get(email=user['email'], user_id=user['user_id'])
             AuthToken.objects.get(user=user)
         except User.DoesNotExist:
             raise exceptions.AuthenticationFailed('User not found for this token')
@@ -45,7 +47,7 @@ class FyleJWTAuthentication(BaseAuthentication):
         return header
 
     @staticmethod
-    def validate_token(access_token_string: str) -> str:
+    def validate_token(access_token_string: str) -> Dict:
         """
         Validate the access token
         :param access_token_string:
@@ -66,6 +68,9 @@ class FyleJWTAuthentication(BaseAuthentication):
 
             if response.status_code == 200:
                 result = json.loads(response.text)['data']
-                return result['employee_email']
+                return {
+                    'email': result['employee_email'],
+                    'user_id': result['user_id']
+                }
 
         raise exceptions.AuthenticationFailed('Invalid access token')

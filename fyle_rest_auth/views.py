@@ -45,6 +45,7 @@ class LoginView(APIView):
             users = get_user_model()
 
             user, _ = users.objects.get_or_create(
+                user_id=employee_info['user_id'],
                 email=employee_info['employee_email']
             )
 
@@ -120,7 +121,8 @@ class RefreshView(APIView):
             employee_info = auth.get_fyle_user(refresh_token)
             users = get_user_model()
 
-            user = users.objects.filter(email=employee_info['employee_email']).first()
+            user = users.objects.filter(email=employee_info['employee_email'],
+                                        user_id=employee_info['user_id']).first()
 
             if not user:
                 return Response(
