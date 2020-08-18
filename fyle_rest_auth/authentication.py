@@ -74,6 +74,7 @@ class FyleJWTAuthentication(BaseAuthentication):
 
             if email is None:
                 if user is None:
+                    cache.delete_many([email_unique_key, user_unique_key])
                     response = requests.get(my_profile_uri, headers=api_headers)
 
                     if response.status_code == 200:
