@@ -5,6 +5,7 @@ import requests
 
 from django.contrib.auth import get_user_model
 from django.conf import settings
+from django.core.cache import cache
 
 from rest_framework.authentication import BaseAuthentication
 from rest_framework import exceptions
@@ -55,6 +56,7 @@ class FyleJWTAuthentication(BaseAuthentication):
         """
         if access_token_string:
             access_token_tokenizer = access_token_string.split(' ')
+            unique_key_generator = access_token_tokenizer[1].split('.')
 
             if not access_token_tokenizer or len(access_token_tokenizer) != 2 or access_token_tokenizer[0] != 'Bearer':
                 raise exceptions.AuthenticationFailed('Invalid access token structure')
@@ -64,13 +66,31 @@ class FyleJWTAuthentication(BaseAuthentication):
 
             api_headers = {'Authorization': '{0}'.format(access_token_string)}
 
-            response = requests.get(my_profile_uri, headers=api_headers)
+            email_unique_key = 'email_' + unique_key_generator[2]
+            user_unique_key = 'user_' + unique_key_generator[2]
 
-            if response.status_code == 200:
-                result = json.loads(response.text)['data']
+            email = cache.get(email_unique_key)
+            user = cache.get(user_unique_key)
+
+            if email is None:
+                if user is None:
+                    response = requests.get(my_profile_uri, headers=api_headers)
+
+                    if response.status_code == 200:
+                        result = json.loads(response.text)['data']
+
+                        cache.set(email_unique_key, result['employee_email'], 900)
+                        cache.set(user_unique_key, result['user_id'], 900)
+
+                        return {
+                            'email': result['employee_email'],
+                            'user_id': result['user_id']
+                        }
+
+            elif email and user:
                 return {
-                    'email': result['employee_email'],
-                    'user_id': result['user_id']
+                    'email': email,
+                    'user_id': user
                 }
 
         raise exceptions.AuthenticationFailed('Invalid access token')

@@ -59,6 +59,20 @@ urlpatterns = [
     
 ]
 ```
+* Configure cache in settings file
+```pythonstub
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'your_cache_table',
+    }
+}
+```
+
+* Creating the cache table
+```pythonstub
+python manage.py createcachetable
+```
 
 ## License
 
