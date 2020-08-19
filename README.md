@@ -49,6 +49,7 @@ FYLE_BASE_URL = '<Fyle Base URL>'
 FYLE_TOKEN_URI = '<Fyle Token URI>'
 FYLE_CLIENT_ID = '<Fyle Client Id>'
 FYLE_CLIENT_SECRET = '<Fyle Client Secret>'
+CACHE_EXPIRY = '< Cache Expiry Time in Seconds>'
 ```
 
 * Include urls in the the django app.
