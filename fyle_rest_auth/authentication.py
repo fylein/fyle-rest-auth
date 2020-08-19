@@ -66,27 +66,26 @@ class FyleJWTAuthentication(BaseAuthentication):
 
             api_headers = {'Authorization': '{0}'.format(access_token_string)}
 
-            email_unique_key = 'email_' + unique_key_generator[2]
-            user_unique_key = 'user_' + unique_key_generator[2]
+            email_unique_key = 'email_{0}'.format(unique_key_generator[2])
+            user_unique_key = 'user_{0}'.format(unique_key_generator[2])
 
             email = cache.get(email_unique_key)
             user = cache.get(user_unique_key)
 
-            if email is None:
-                if user is None:
-                    cache.delete_many([email_unique_key, user_unique_key])
-                    response = requests.get(my_profile_uri, headers=api_headers)
+            if not (email and user):
+                cache.delete_many([email_unique_key, user_unique_key])
+                response = requests.get(my_profile_uri, headers=api_headers)
 
-                    if response.status_code == 200:
-                        result = json.loads(response.text)['data']
+                if response.status_code == 200:
+                    result = json.loads(response.text)['data']
 
-                        cache.set(email_unique_key, result['employee_email'], 900)
-                        cache.set(user_unique_key, result['user_id'], 900)
+                    cache.set(email_unique_key, result['employee_email'], settings.CACHE_EXPIRY)
+                    cache.set(user_unique_key, result['user_id'], settings.CACHE_EXPIRY)
 
-                        return {
-                            'email': result['employee_email'],
-                            'user_id': result['user_id']
-                        }
+                    return {
+                        'email': result['employee_email'],
+                        'user_id': result['user_id']
+                    }
 
             elif email and user:
                 return {
