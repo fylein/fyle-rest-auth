@@ -11,3 +11,6 @@ class AuthToken(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.OneToOneField(User, on_delete=models.PROTECT, help_text='User table relation')
     refresh_token = models.TextField(help_text='Fyle refresh token')
+
+    class Meta:
+        db_table = 'auth_tokens'

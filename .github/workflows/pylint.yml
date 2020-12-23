@@ -1,4 +1,4 @@
-name: CI
+name: Pylint Check
 
 on:
   pull_request:
@@ -11,8 +11,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: GitHub Action for pylint
-      uses: cclauss/GitHub-Action-for-pylint@0.7.0
+    - name: Python Pylin GitHub Action
+      uses: fylein/python-pylint-github-action@v4
       with:
-        args: pip install -r requirements.txt && pylint --load-plugins pylint_django --rcfile=.pylintrc **/**
+        args: pip3 install -r requirements.txt && pip install pylint-django && pylint --load-plugins pylint_django --rcfile=.pylintrc **/**.py
         
