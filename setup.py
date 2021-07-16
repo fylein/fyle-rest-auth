@@ -8,7 +8,7 @@ with open('README.md', 'r') as f:
 
 setuptools.setup(
     name='fyle-rest-auth',
-    version='0.7.0',
+    version='0.8.0',
     author='Shwetabh Kumar',
     author_email='shwetabh.kumar@fyle.in',
     description='Django application to implement OAuth 2.0 using Fyle in Django rest framework',
@@ -20,7 +20,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=['requests', 'requests-cache', 'django>=3.0.2',
                       'django-rest-framework==0.1.0', 'requests-cache==0.5.2',
-                      'fylesdk>=0.11.0'],
+                      'fylesdk>=2.2.0'],
     include_package_data=True,
     classifiers=[
         'Framework :: Django',

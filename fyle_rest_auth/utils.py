@@ -5,10 +5,9 @@ import json
 from typing import Dict
 
 import requests
+from django.conf import settings
 
 from fylesdk import FyleSDK, UnauthorizedClientError, NotFoundClientError, InternalServerError, WrongParamsError
-
-from django.conf import settings
 
 
 class AuthUtils:
@@ -82,4 +81,7 @@ class AuthUtils:
             raise WrongParamsError('Some of the parameters were wrong', response.text)
 
         elif response.status_code == 500:
+            raise InternalServerError('Internal server error', response.text)
+
+        else:
             raise InternalServerError('Internal server error', response.text)

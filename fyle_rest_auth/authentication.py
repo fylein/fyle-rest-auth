@@ -24,7 +24,6 @@ class FyleJWTAuthentication(BaseAuthentication):
         Authentication function
         """
         access_token_string = self.get_header(request)
-
         user = self.validate_token(access_token_string=access_token_string)
 
         try:
@@ -54,43 +53,44 @@ class FyleJWTAuthentication(BaseAuthentication):
         :param access_token_string:
         :return:
         """
-        if access_token_string:
-            access_token_tokenizer = access_token_string.split(' ')
-            unique_key_generator = access_token_tokenizer[1].split('.')
+        if not access_token_string:
+            raise exceptions.AuthenticationFailed('Access token missing')
 
-            if not access_token_tokenizer or len(access_token_tokenizer) != 2 or access_token_tokenizer[0] != 'Bearer':
-                raise exceptions.AuthenticationFailed('Invalid access token structure')
+        access_token_tokenizer = access_token_string.split(' ')
+        if not access_token_tokenizer or len(access_token_tokenizer) != 2 or access_token_tokenizer[0] != 'Bearer':
+            raise exceptions.AuthenticationFailed('Invalid access token structure')
+
+        unique_key_generator = access_token_tokenizer[1].split('.')
+        email_unique_key = 'email_{0}'.format(unique_key_generator[2])
+        user_unique_key = 'user_{0}'.format(unique_key_generator[2])
+
+        email = cache.get(email_unique_key)
+        user = cache.get(user_unique_key)
+
+        if not (email and user):
+            cache.delete_many([email_unique_key, user_unique_key])
 
             fyle_base_url = settings.FYLE_BASE_URL
             my_profile_uri = '{0}/api/tpa/v1/employees/my_profile'.format(fyle_base_url)
-
             api_headers = {'Authorization': '{0}'.format(access_token_string)}
 
-            email_unique_key = 'email_{0}'.format(unique_key_generator[2])
-            user_unique_key = 'user_{0}'.format(unique_key_generator[2])
+            response = requests.get(my_profile_uri, headers=api_headers)
 
-            email = cache.get(email_unique_key)
-            user = cache.get(user_unique_key)
+            if response.status_code == 200:
+                result = json.loads(response.text)['data']
 
-            if not (email and user):
-                cache.delete_many([email_unique_key, user_unique_key])
-                response = requests.get(my_profile_uri, headers=api_headers)
+                cache.set(email_unique_key, result['employee_email'])
+                cache.set(user_unique_key, result['user_id'])
 
-                if response.status_code == 200:
-                    result = json.loads(response.text)['data']
-
-                    cache.set(email_unique_key, result['employee_email'], settings.CACHE_EXPIRY)
-                    cache.set(user_unique_key, result['user_id'], settings.CACHE_EXPIRY)
-
-                    return {
-                        'email': result['employee_email'],
-                        'user_id': result['user_id']
-                    }
-
-            elif email and user:
                 return {
-                    'email': email,
-                    'user_id': user
+                    'email': result['employee_email'],
+                    'user_id': result['user_id']
                 }
+
+        elif email and user:
+            return {
+                'email': email,
+                'user_id': user
+            }
 
         raise exceptions.AuthenticationFailed('Invalid access token')
