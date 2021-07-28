@@ -41,7 +41,7 @@ class LoginView(APIView):
 
             tokens = auth.generate_fyle_refresh_token(authorization_code=authorization_code)
 
-            employee_info = auth.get_fyle_user(tokens['refresh_token'], auth.get_client_ip(request))
+            employee_info = auth.get_fyle_user(tokens['refresh_token'], auth.get_origin_address(request))
             users = get_user_model()
 
             user, _ = users.objects.get_or_create(
@@ -118,7 +118,7 @@ class RefreshView(APIView):
                 )
             tokens = auth.refresh_access_token(refresh_token)
 
-            employee_info = auth.get_fyle_user(refresh_token, auth.get_client_ip(request))
+            employee_info = auth.get_fyle_user(refresh_token, auth.get_origin_address(request))
             users = get_user_model()
 
             user = users.objects.filter(email=employee_info['employee_email'],

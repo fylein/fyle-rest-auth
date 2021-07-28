@@ -47,7 +47,7 @@ class AuthUtils:
 
         return self.post(url=self.token_url, body=api_data)
 
-    def get_fyle_user(self, refresh_token: str, client_ip: str) -> Dict:
+    def get_fyle_user(self, refresh_token: str, origin_address: str) -> Dict:
         """
         Get Fyle user detail
         """
@@ -56,7 +56,7 @@ class AuthUtils:
             client_id=self.client_id,
             client_secret=self.client_secret,
             refresh_token=refresh_token,
-            origin_address=client_ip
+            origin_address=origin_address
         )
 
         employee_detail = connection.Employees.get_my_profile()['data']
@@ -86,7 +86,7 @@ class AuthUtils:
             raise InternalServerError('Internal server error', response.text)
 
     @staticmethod
-    def get_client_ip(request):
+    def get_origin_address(request):
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         if x_forwarded_for:
             ip = x_forwarded_for.split(',')[-1].strip()
