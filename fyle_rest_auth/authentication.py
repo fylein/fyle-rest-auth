@@ -11,8 +11,10 @@ from rest_framework.authentication import BaseAuthentication
 from rest_framework import exceptions
 
 from .models import AuthToken
+from .utils import AuthUtils
 
 User = get_user_model()
+auth = AuthUtils()
 
 
 class FyleJWTAuthentication(BaseAuthentication):
@@ -25,7 +27,10 @@ class FyleJWTAuthentication(BaseAuthentication):
         """
         access_token_string = self.get_header(request)
 
-        user = self.validate_token(access_token_string=access_token_string)
+        user = self.validate_token(
+            access_token_string=access_token_string,
+            origin_address=auth.get_origin_address(request)
+        )
 
         try:
             user = User.objects.get(email=user['email'], user_id=user['user_id'])
@@ -48,9 +53,10 @@ class FyleJWTAuthentication(BaseAuthentication):
         return header
 
     @staticmethod
-    def validate_token(access_token_string: str) -> Dict:
+    def validate_token(access_token_string: str, origin_address: str) -> Dict:
         """
         Validate the access token
+        :param origin_address:
         :param access_token_string:
         :return:
         """
@@ -64,7 +70,10 @@ class FyleJWTAuthentication(BaseAuthentication):
             fyle_base_url = settings.FYLE_BASE_URL
             my_profile_uri = '{0}/api/tpa/v1/employees/my_profile'.format(fyle_base_url)
 
-            api_headers = {'Authorization': '{0}'.format(access_token_string)}
+            api_headers = {
+                'Authorization': '{0}'.format(access_token_string),
+                'X-Forwarded-For': origin_address
+            }
 
             email_unique_key = 'email_{0}'.format(unique_key_generator[2])
             user_unique_key = 'user_{0}'.format(unique_key_generator[2])
