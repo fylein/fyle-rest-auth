@@ -9,14 +9,15 @@ from .models import AuthToken
 auth = AuthUtils()
 
 
-def validate_code_and_login(authorization_code: str):
+def validate_code_and_login(request):
+    authorization_code = request.data.get('code')
     try:
         if not authorization_code:
             raise AuthenticationFailed('authorization code not found')
 
         tokens = auth.generate_fyle_refresh_token(authorization_code=authorization_code)
 
-        employee_info = auth.get_fyle_user(tokens['refresh_token'])
+        employee_info = auth.get_fyle_user(tokens['refresh_token'], auth.get_origin_address(request))
         users = get_user_model()
 
         user, _ = users.objects.get_or_create(
@@ -39,14 +40,15 @@ def validate_code_and_login(authorization_code: str):
     except Exception as error:
         raise AuthenticationFailed(error)
 
-def validate_and_refresh_token(refresh_token: str):
+def validate_and_refresh_token(request):
+    refresh_token = request.data.get('refresh_token')
     try:
         if not refresh_token:
             raise AuthenticationFailed('refresh token not found')
 
         tokens = auth.refresh_access_token(refresh_token)
 
-        employee_info = auth.get_fyle_user(refresh_token)
+        employee_info = auth.get_fyle_user(refresh_token, auth.get_origin_address(request))
         users = get_user_model()
 
         user = users.objects.filter(email=employee_info['employee_email'], user_id=employee_info['user_id']).first()

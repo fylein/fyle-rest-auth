@@ -18,7 +18,7 @@ class LoginView(APIView):
         """
         Login using authorization code
         """
-        tokens = validate_code_and_login(request.data.get('code'))
+        tokens = validate_code_and_login(request)
 
         return Response(
             data=tokens,
@@ -34,7 +34,7 @@ class RefreshView(APIView):
     permission_classes = []
 
     def post(self, request):
-        tokens = validate_and_refresh_token(request.data.get('refresh_token'))
+        tokens = validate_and_refresh_token(request)
 
         return Response(
             data=tokens,
