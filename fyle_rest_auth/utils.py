@@ -46,7 +46,7 @@ class AuthUtils:
 
         return self.post(url=self.token_url, body=api_data)
 
-    def get_fyle_user(self, refresh_token: str, origin_address: str) -> Dict:
+    def get_fyle_user(self, refresh_token: str, origin_address: str=None) -> Dict:
         """
         Get Fyle user detail
         """
