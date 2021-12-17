@@ -1,7 +1,4 @@
-import json
 from typing import Dict
-
-import requests
 
 from rest_framework.exceptions import ValidationError
 
@@ -9,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.utils.module_loading import import_string
 
-from .utils import AuthUtils
+from .utils import AuthUtils, post_request, get_request
 from .models import AuthToken
 
 auth = AuthUtils()
@@ -59,7 +56,7 @@ def validate_and_refresh_token(request):
         users = get_user_model()
 
         user = users.objects.filter(
-            email=employee_info['data']['user']['email'],user_id=employee_info['data']['user']['id']
+            email=employee_info['data']['user']['email'], user_id=employee_info['data']['user']['id']
         ).first()
 
         if not user:
@@ -105,47 +102,3 @@ def get_fyle_admin(access_token: str, origin_address: str = None) -> Dict:
         return employee_detail
     else:
         raise Exception('User is not an admin')
-
-
-def post_request(url, body, access_token: str = None, origin_address: str = None) -> Dict:
-    """
-    Create a HTTP post request.
-    """
-    api_headers = {
-        'content-type': 'application/json',
-        'X-Forwarded-For': origin_address
-    }
-
-    if access_token:
-        api_headers['Authorization'] = 'Bearer {0}'.format(access_token)
-
-    response = requests.post(
-        url,
-        headers=api_headers,
-        data=body
-    )
-
-    if response.status_code == 200:
-        return json.loads(response.text)
-    else:
-        raise Exception(response.text)
-
-
-def get_request(url, access_token, origin_address: str = None):
-    """
-    Create a HTTP get request.
-    """
-    api_headers = {
-        'Authorization': 'Bearer {0}'.format(access_token),
-        'X-Forwarded-For': origin_address
-    }
-
-    response = requests.get(
-        url,
-        headers=api_headers
-    )
-
-    if response.status_code == 200:
-        return json.loads(response.text)
-    else:
-        raise Exception(response.text)

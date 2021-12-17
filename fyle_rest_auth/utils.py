@@ -1,11 +1,56 @@
 """
 Authentication utils
 """
+import json
 from typing import Dict
 
 from django.conf import settings
 
-from .helpers import post_request
+import requests
+
+
+def post_request(url, body, access_token: str = None, origin_address: str = None) -> Dict:
+    """
+    Create a HTTP post request.
+    """
+    api_headers = {
+        'content-type': 'application/json',
+        'X-Forwarded-For': origin_address
+    }
+
+    if access_token:
+        api_headers['Authorization'] = 'Bearer {0}'.format(access_token)
+
+    response = requests.post(
+        url,
+        headers=api_headers,
+        data=body
+    )
+
+    if response.status_code == 200:
+        return json.loads(response.text)
+    else:
+        raise Exception(response.text)
+
+
+def get_request(url, access_token, origin_address: str = None):
+    """
+    Create a HTTP get request.
+    """
+    api_headers = {
+        'Authorization': 'Bearer {0}'.format(access_token),
+        'X-Forwarded-For': origin_address
+    }
+
+    response = requests.get(
+        url,
+        headers=api_headers
+    )
+
+    if response.status_code == 200:
+        return json.loads(response.text)
+    else:
+        raise Exception(response.text)
 
 
 class AuthUtils:
