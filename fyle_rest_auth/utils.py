@@ -1,11 +1,11 @@
 """
 Authentication utils
 """
-import json
 from typing import Dict
 
-import requests
 from django.conf import settings
+
+from .helpers import post_request
 
 
 class AuthUtils:
@@ -42,20 +42,8 @@ class AuthUtils:
             'refresh_token': refresh_token
         }
 
-        return self.post(url=self.token_url, body=api_data)
+        return post_request(self.token_url, api_data)
 
-
-    @staticmethod
-    def post(url, body):
-        """
-        Send Post request
-        """
-        response = requests.post(url, data=body)
-
-        if response.status_code == 200:
-            return json.loads(response.text)
-        else:
-            raise Exception(response.text)
 
     @staticmethod
     def get_origin_address(request):

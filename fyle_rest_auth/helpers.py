@@ -107,15 +107,17 @@ def get_fyle_admin(access_token: str, origin_address: str = None) -> Dict:
         raise Exception('User is not an admin')
 
 
-def post_request(url, body, access_token: str, origin_address: str = None) -> Dict:
+def post_request(url, body, access_token: str = None, origin_address: str = None) -> Dict:
     """
     Create a HTTP post request.
     """
     api_headers = {
         'content-type': 'application/json',
-        'Authorization': 'Bearer {0}'.format(access_token),
         'X-Forwarded-For': origin_address
     }
+
+    if access_token:
+        api_headers['Authorization'] = 'Bearer {0}'.format(access_token)
 
     response = requests.post(
         url,
