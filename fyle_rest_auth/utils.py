@@ -7,8 +7,6 @@ from typing import Dict
 import requests
 from django.conf import settings
 
-from fylesdk import FyleSDK, UnauthorizedClientError, NotFoundClientError, InternalServerError, WrongParamsError
-
 
 class AuthUtils:
     """
@@ -46,21 +44,6 @@ class AuthUtils:
 
         return self.post(url=self.token_url, body=api_data)
 
-    def get_fyle_user(self, refresh_token: str, origin_address: str = None) -> Dict:
-        """
-        Get Fyle user detail
-        """
-        connection = FyleSDK(
-            base_url=self.base_url,
-            client_id=self.client_id,
-            client_secret=self.client_secret,
-            refresh_token=refresh_token,
-            origin_address=origin_address
-        )
-
-        employee_detail = connection.Employees.get_my_profile()['data']
-
-        return employee_detail
 
     @staticmethod
     def post(url, body):
@@ -71,21 +54,8 @@ class AuthUtils:
 
         if response.status_code == 200:
             return json.loads(response.text)
-
-        elif response.status_code == 401:
-            raise UnauthorizedClientError('Wrong client secret or/and refresh token', response.text)
-
-        elif response.status_code == 404:
-            raise NotFoundClientError('Client ID doesn\'t exist', response.text)
-
-        elif response.status_code == 400:
-            raise WrongParamsError('Some of the parameters were wrong', response.text)
-
-        elif response.status_code == 500:
-            raise InternalServerError('Internal server error', response.text)
-
         else:
-            raise InternalServerError('Internal server error', response.text)
+            raise Exception(response.text)
 
     @staticmethod
     def get_origin_address(request):

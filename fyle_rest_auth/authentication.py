@@ -1,15 +1,12 @@
-import json
 from typing import Dict
 
-import requests
-
 from django.contrib.auth import get_user_model
-from django.conf import settings
 from django.core.cache import cache
 
 from rest_framework.authentication import BaseAuthentication
-from rest_framework import exceptions
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
 
+from .helpers import get_fyle_admin
 from .models import AuthToken
 from .utils import AuthUtils
 
@@ -36,9 +33,9 @@ class FyleJWTAuthentication(BaseAuthentication):
             user = User.objects.get(email=user['email'], user_id=user['user_id'])
             AuthToken.objects.get(user=user)
         except User.DoesNotExist:
-            raise exceptions.AuthenticationFailed('User not found for this token')
+            raise ValidationError('User not found for this token')
         except AuthToken.DoesNotExist:
-            raise exceptions.AuthenticationFailed('Login details not found for the user')
+            raise ValidationError('Login details not found for the user')
 
         return user, None
 
@@ -61,11 +58,11 @@ class FyleJWTAuthentication(BaseAuthentication):
         :return:
         """
         if not access_token_string:
-            raise exceptions.AuthenticationFailed('Access token missing')
+            raise ValidationError('Access token missing')
 
         access_token_tokenizer = access_token_string.split(' ')
         if not access_token_tokenizer or len(access_token_tokenizer) != 2 or access_token_tokenizer[0] != 'Bearer':
-            raise exceptions.AuthenticationFailed('Invalid access token structure')
+            raise ValidationError('Invalid access token structure')
 
         unique_key_generator = access_token_tokenizer[1].split('.')
         email_unique_key = 'email_{0}'.format(unique_key_generator[2])
@@ -77,25 +74,18 @@ class FyleJWTAuthentication(BaseAuthentication):
         if not (email and user):
             cache.delete_many([email_unique_key, user_unique_key])
 
-            fyle_base_url = settings.FYLE_BASE_URL
-            my_profile_uri = '{0}/api/tpa/v1/employees/my_profile'.format(fyle_base_url)
-            api_headers = {
-                'Authorization': '{0}'.format(access_token_string),
-                'X-Forwarded-For': origin_address
+            try:
+                employee_info = get_fyle_admin(access_token_string.split(' ')[1], origin_address)
+            except Exception:
+                raise AuthenticationFailed('Invalid access token')
+
+            cache.set(email_unique_key, employee_info['data']['user']['email'])
+            cache.set(user_unique_key, employee_info['data']['user']['id'])
+
+            return {
+                'email': employee_info['data']['user']['email'],
+                'user_id': employee_info['data']['user']['id']
             }
-
-            response = requests.get(my_profile_uri, headers=api_headers)
-
-            if response.status_code == 200:
-                result = json.loads(response.text)['data']
-
-                cache.set(email_unique_key, result['employee_email'])
-                cache.set(user_unique_key, result['user_id'])
-
-                return {
-                    'email': result['employee_email'],
-                    'user_id': result['user_id']
-                }
 
         elif email and user:
             return {
@@ -103,4 +93,4 @@ class FyleJWTAuthentication(BaseAuthentication):
                 'user_id': user
             }
 
-        raise exceptions.AuthenticationFailed('Invalid access token')
+        raise AuthenticationFailed('Invalid access token')
