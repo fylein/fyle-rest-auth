@@ -1,9 +1,12 @@
-from rest_framework.exceptions import AuthenticationFailed
+from typing import Dict
+
+from rest_framework.exceptions import ValidationError
+
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.utils.module_loading import import_string
 
-from .utils import AuthUtils
+from .utils import AuthUtils, post_request, get_request
 from .models import AuthToken
 
 auth = AuthUtils()
@@ -13,16 +16,16 @@ def validate_code_and_login(request):
     authorization_code = request.data.get('code')
     try:
         if not authorization_code:
-            raise AuthenticationFailed('authorization code not found')
+            raise ValidationError('authorization code not found')
 
         tokens = auth.generate_fyle_refresh_token(authorization_code=authorization_code)
 
-        employee_info = auth.get_fyle_user(tokens['refresh_token'], auth.get_origin_address(request))
+        employee_info = get_fyle_admin(tokens['access_token'], auth.get_origin_address(request))
         users = get_user_model()
 
         user, _ = users.objects.get_or_create(
-            user_id=employee_info['user_id'],
-            email=employee_info['employee_email']
+            user_id=employee_info['data']['user']['id'],
+            email=employee_info['data']['user']['email']
         )
 
         AuthToken.objects.update_or_create(
@@ -38,23 +41,26 @@ def validate_code_and_login(request):
         return tokens
 
     except Exception as error:
-        raise AuthenticationFailed(error)
+        raise ValidationError(error)
+
 
 def validate_and_refresh_token(request):
     refresh_token = request.data.get('refresh_token')
     try:
         if not refresh_token:
-            raise AuthenticationFailed('refresh token not found')
+            raise ValidationError('refresh token not found')
 
         tokens = auth.refresh_access_token(refresh_token)
 
-        employee_info = auth.get_fyle_user(refresh_token, auth.get_origin_address(request))
+        employee_info = get_fyle_admin(tokens['access_token'], auth.get_origin_address(request))
         users = get_user_model()
 
-        user = users.objects.filter(email=employee_info['employee_email'], user_id=employee_info['user_id']).first()
+        user = users.objects.filter(
+            email=employee_info['data']['user']['email'], user_id=employee_info['data']['user']['id']
+        ).first()
 
         if not user:
-            raise AuthenticationFailed('User record not found, please login')
+            raise ValidationError('User record not found, please login')
 
         auth_token = AuthToken.objects.get(user=user)
         auth_token.refresh_token = refresh_token
@@ -67,4 +73,32 @@ def validate_and_refresh_token(request):
         return tokens
 
     except Exception as error:
-        raise AuthenticationFailed(error)
+        raise ValidationError(error)
+
+
+def get_cluster_domain(access_token: str, origin_address: str = None) -> str:
+    """
+    Get cluster domain name from fyle
+    :param access_token: (str)
+    :return: cluster_domain (str)
+    """
+    cluster_api_url = '{0}/oauth/cluster/'.format(settings.FYLE_BASE_URL)
+
+    return post_request(cluster_api_url, {}, access_token, origin_address)['cluster_domain']
+
+
+def get_fyle_admin(access_token: str, origin_address: str = None) -> Dict:
+    """
+    Get user profile from fyle
+    :param access_token: (str)
+    :return: user_profile (dict)
+    """
+    cluster_domain = get_cluster_domain(access_token, origin_address)
+
+    profile_api_url = '{}/platform/v1beta/spender/my_profile'.format(cluster_domain)
+    employee_detail = get_request(profile_api_url, access_token, origin_address)
+
+    if 'ADMIN' in employee_detail['data']['roles']:
+        return employee_detail
+    else:
+        raise Exception('User is not an admin')
