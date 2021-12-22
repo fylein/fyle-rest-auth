@@ -24,7 +24,7 @@ def post_request(url, body, access_token: str = None, origin_address: str = None
     response = requests.post(
         url,
         headers=api_headers,
-        data=body
+        data=json.dumps(body)
     )
 
     if response.status_code == 200:
@@ -74,7 +74,7 @@ class AuthUtils:
             'code': authorization_code
         }
 
-        return self.post(url=self.token_url, body=api_data)
+        return post_request(url=self.token_url, body=api_data)
 
     def refresh_access_token(self, refresh_token: str) -> Dict:
         """
