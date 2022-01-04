@@ -37,6 +37,9 @@ def validate_code_and_login(request):
 
         serializer = import_string(settings.FYLE_REST_AUTH_SERIALIZERS['USER_DETAILS_SERIALIZER'])
         tokens['user'] = serializer(user).data
+        tokens['user']['full_name'] = employee_info['data']['user']['full_name']
+        tokens['user']['org_id'] = employee_info['data']['org']['id']
+        tokens['user']['org_name'] = employee_info['data']['org']['name']
 
         return tokens
 
