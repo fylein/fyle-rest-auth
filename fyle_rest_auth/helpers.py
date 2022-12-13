@@ -101,7 +101,8 @@ def get_fyle_admin(access_token: str, origin_address: str = None) -> Dict:
     profile_api_url = '{}/platform/v1beta/spender/my_profile'.format(cluster_domain)
     employee_detail = get_request(profile_api_url, access_token, origin_address)
 
-    if settings.IS_PARTNER_DASHBOARD or 'ADMIN' in employee_detail['data']['roles']:
+    if 'ADMIN' in employee_detail['data']['roles'] or \
+        ('FYLE_MODULE' in settings.FYLE_REST_AUTH_SERIALIZERS and settings.FYLE_REST_AUTH_SERIALIZERS['FYLE_MODULE'] == 'PARTNER_DASHBOARD'):
         return employee_detail
     else:
         raise Exception('User is not an admin')
