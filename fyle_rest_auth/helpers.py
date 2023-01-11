@@ -6,6 +6,8 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.utils.module_loading import import_string
 
+from django_q.tasks import async_task
+
 from .utils import AuthUtils, post_request, get_request
 from .models import AuthToken
 
@@ -40,6 +42,9 @@ def validate_code_and_login(request):
         tokens['user']['full_name'] = employee_info['data']['user']['full_name']
         tokens['user']['org_id'] = employee_info['data']['org']['id']
         tokens['user']['org_name'] = employee_info['data']['org']['name']
+
+        # Update Fyle Credentials with latest healthy token
+        async_task('apps.workspaces.tasks.async_update_fyle_credentials', employee_info['data']['org']['id'], tokens['refresh_token'])
 
         return tokens
 
