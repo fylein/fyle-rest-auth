@@ -44,7 +44,10 @@ def validate_code_and_login(request):
         tokens['user']['org_name'] = employee_info['data']['org']['name']
 
         # Update Fyle Credentials with latest healthy token
-        async_task('apps.workspaces.tasks.async_update_fyle_credentials', employee_info['data']['org']['id'], tokens['refresh_token'])
+        async_task(
+            'apps.workspaces.tasks.async_update_fyle_credentials',
+            employee_info['data']['org']['id'], tokens['refresh_token']
+        )
 
         return tokens
 
