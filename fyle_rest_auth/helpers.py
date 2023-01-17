@@ -82,7 +82,7 @@ def validate_refresh_token_and_login(request):
         AuthToken.objects.update_or_create(
             user=user,
             defaults={
-                'refresh_token': tokens['refresh_token']
+                'refresh_token': refresh_token
             }
         )
 
