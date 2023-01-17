@@ -44,10 +44,62 @@ def validate_code_and_login(request):
         tokens['user']['org_name'] = employee_info['data']['org']['name']
 
         # Update Fyle Credentials with latest healthy token
-        async_task(
-            'apps.workspaces.tasks.async_update_fyle_credentials',
-            employee_info['data']['org']['id'], tokens['refresh_token']
+        if 'async_update_user' in settings.FYLE_REST_AUTH_SETTINGS \
+             and settings.FYLE_REST_AUTH_SETTINGS['async_update_user']:
+            async_task(
+                'apps.workspaces.tasks.async_update_fyle_credentials',
+                employee_info['data']['org']['id'], tokens['refresh_token']
+            )
+
+        return tokens
+
+    except Exception as error:
+        raise ValidationError(error)
+
+
+def validate_refresh_token_and_login(request):
+    """
+    Takes refresh_token from payload
+    GET Fyle Admin info
+    Get Or Create User
+    Saves AuthToken
+    Return Tokens
+    """
+    refresh_token = request.data.get('refresh_token')
+    try:
+        if not refresh_token:
+            raise ValidationError('refresh token not found')
+
+        tokens = auth.refresh_access_token(refresh_token)
+
+        employee_info = get_fyle_admin(tokens['access_token'], auth.get_origin_address(request))
+        users = get_user_model()
+
+        user, _ = users.objects.get_or_create(
+            user_id=employee_info['data']['user']['id'],
+            email=employee_info['data']['user']['email']
         )
+
+        AuthToken.objects.update_or_create(
+            user=user,
+            defaults={
+                'refresh_token': refresh_token
+            }
+        )
+
+        serializer = import_string(settings.FYLE_REST_AUTH_SERIALIZERS['USER_DETAILS_SERIALIZER'])
+        tokens['user'] = serializer(user).data
+        tokens['user']['full_name'] = employee_info['data']['user']['full_name']
+        tokens['user']['org_id'] = employee_info['data']['org']['id']
+        tokens['user']['org_name'] = employee_info['data']['org']['name']
+
+        # Update Fyle Credentials with latest healthy token
+        if 'async_update_user' in settings.FYLE_REST_AUTH_SETTINGS \
+             and settings.FYLE_REST_AUTH_SETTINGS['async_update_user']:
+            async_task(
+                'apps.workspaces.tasks.async_update_fyle_credentials',
+                employee_info['data']['org']['id'], tokens['refresh_token']
+            )
 
         return tokens
 
