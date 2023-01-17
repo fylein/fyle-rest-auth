@@ -44,7 +44,8 @@ def validate_code_and_login(request):
         tokens['user']['org_name'] = employee_info['data']['org']['name']
 
         # Update Fyle Credentials with latest healthy token
-        if 'async_update_user' in settings.FYLE_REST_AUTH_SETTINGS and settings.FYLE_REST_AUTH_SETTINGS['async_update_user']:
+        if 'async_update_user' in settings.FYLE_REST_AUTH_SETTINGS \
+             and settings.FYLE_REST_AUTH_SETTINGS['async_update_user']:
             async_task(
                 'apps.workspaces.tasks.async_update_fyle_credentials',
                 employee_info['data']['org']['id'], tokens['refresh_token']
@@ -93,7 +94,8 @@ def validate_refresh_token_and_login(request):
         tokens['user']['org_name'] = employee_info['data']['org']['name']
 
         # Update Fyle Credentials with latest healthy token
-        if 'async_update_user' in settings.FYLE_REST_AUTH_SETTINGS and settings.FYLE_REST_AUTH_SETTINGS['async_update_user']:
+        if 'async_update_user' in settings.FYLE_REST_AUTH_SETTINGS \
+             and settings.FYLE_REST_AUTH_SETTINGS['async_update_user']:
             async_task(
                 'apps.workspaces.tasks.async_update_fyle_credentials',
                 employee_info['data']['org']['id'], tokens['refresh_token']
