@@ -1,3 +1,5 @@
+import logging
+import traceback
 from typing import Dict
 
 from rest_framework.exceptions import ValidationError
@@ -12,6 +14,9 @@ from .utils import AuthUtils, post_request, get_request
 from .models import AuthToken
 
 auth = AuthUtils()
+
+logger = logging.getLogger(__name__)
+logger.level = logging.INFO
 
 
 def validate_code_and_login(request):
@@ -53,7 +58,12 @@ def validate_code_and_login(request):
 
         return tokens
 
+    except ValidationError as error:
+        logger.info(error)
+        raise
+
     except Exception as error:
+        logger.error(traceback.format_exc())
         raise ValidationError(error)
 
 
@@ -103,7 +113,12 @@ def validate_refresh_token_and_login(request):
 
         return tokens
 
+    except ValidationError as error:
+        logger.info(error)
+        raise
+
     except Exception as error:
+        logger.error(traceback.format_exc())
         raise ValidationError(error)
 
 
@@ -134,8 +149,13 @@ def validate_and_refresh_token(request):
         tokens['refresh_token'] = refresh_token
 
         return tokens
+    
+    except ValidationError as error:
+        logger.info(error)
+        raise
 
     except Exception as error:
+        logger.error(traceback.format_exc())
         raise ValidationError(error)
 
 
@@ -166,4 +186,4 @@ def get_fyle_admin(access_token: str, origin_address: str = None) -> Dict:
             settings.FYLE_REST_AUTH_SERIALIZERS['FYLE_MODULE'] == 'PARTNER_DASHBOARD'):
         return employee_detail
     else:
-        raise Exception('User is not an admin')
+        raise ValidationError('User is not an admin')
