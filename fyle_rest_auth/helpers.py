@@ -149,7 +149,7 @@ def validate_and_refresh_token(request):
         tokens['refresh_token'] = refresh_token
 
         return tokens
-    
+
     except ValidationError as error:
         logger.info(error)
         raise
