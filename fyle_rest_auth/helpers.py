@@ -27,7 +27,7 @@ def get_cluster_domain_by_code(request):
 
         tokens = auth.generate_fyle_refresh_token(authorization_code=authorization_code)
 
-        cluster_domain = get_cluster_domain(tokens['access_token'], auth.get_origin_address(request))
+        cluster_domain = 'http://localhost:8002' if settings.DEBUG else get_cluster_domain(tokens['access_token'], auth.get_origin_address(request))
 
         return {
             'cluster_domain': cluster_domain,
