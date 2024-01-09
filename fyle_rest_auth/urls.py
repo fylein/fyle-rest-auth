@@ -15,10 +15,11 @@ Including another URLconf
 """
 from django.urls import path
 
-from .views import LoginView, RefreshView, LoginWithRefreshTokenView
+from .views import LoginView, RefreshView, LoginWithRefreshTokenView, ClusterDomainView
 
 urlpatterns = [
     path('login/', LoginView.as_view()),
     path('refresh/', RefreshView.as_view()),
     path('login_with_refresh_token/', LoginWithRefreshTokenView.as_view()),
+    path('cluster_domain/', ClusterDomainView.as_view()),
 ]

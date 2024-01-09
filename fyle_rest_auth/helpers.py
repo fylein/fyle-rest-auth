@@ -19,6 +19,31 @@ logger = logging.getLogger(__name__)
 logger.level = logging.INFO
 
 
+def get_cluster_domain_by_code(request):
+    authorization_code = request.data.get('code')
+    try:
+        if not authorization_code:
+            raise ValidationError('authorization code not found')
+
+        tokens = auth.generate_fyle_refresh_token(authorization_code=authorization_code)
+
+        cluster_domain = settings.API_URL.split('/api')[0] if settings.DEBUG \
+            else get_cluster_domain(tokens['access_token'], auth.get_origin_address(request))
+
+        return {
+            'cluster_domain': cluster_domain,
+            'tokens': tokens
+        }
+
+    except ValidationError as error:
+        logger.info(error)
+        raise
+
+    except Exception as error:
+        logger.error(traceback.format_exc())
+        raise ValidationError(error)
+
+
 def validate_code_and_login(request):
     authorization_code = request.data.get('code')
     try:

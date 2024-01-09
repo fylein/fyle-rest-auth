@@ -7,7 +7,8 @@ from rest_framework.response import Response
 from .helpers import (
     validate_code_and_login,
     validate_and_refresh_token,
-    validate_refresh_token_and_login
+    validate_refresh_token_and_login,
+    get_cluster_domain_by_code
 )
 
 
@@ -61,5 +62,21 @@ class RefreshView(APIView):
 
         return Response(
             data=tokens,
+            status=status.HTTP_200_OK
+        )
+
+
+class ClusterDomainView(APIView):
+    """
+    Get Cluster Domain
+    """
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request):
+        response = get_cluster_domain_by_code(request)
+
+        return Response(
+            data=response,
             status=status.HTTP_200_OK
         )
