@@ -79,9 +79,6 @@ def validate_code_and_login(request):
             async_task(
                 'apps.workspaces.tasks.async_update_fyle_credentials',
                 employee_info['data']['org']['id'], tokens['refresh_token'],
-                q_options={
-                    'cluster': 'import'
-                }
             )
 
         return tokens
@@ -137,9 +134,6 @@ def validate_refresh_token_and_login(request):
             async_task(
                 'apps.workspaces.tasks.async_update_fyle_credentials',
                 employee_info['data']['org']['id'], tokens['refresh_token'],
-                q_options={
-                    'cluster': 'import'
-                }
             )
 
         return tokens
