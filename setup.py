@@ -19,7 +19,7 @@ setuptools.setup(
     url='https://github.com/fylein/fyle-rest-auth',
     packages=setuptools.find_packages(),
     install_requires=['requests>=2.25.0', 'django>=3.0.2',
-                      'django-rest-framework==0.1.0', 'django-q>=1.3.3'],
+                      'django-rest-framework==0.1.0'],
     include_package_data=True,
     classifiers=[
         'Framework :: Django',
