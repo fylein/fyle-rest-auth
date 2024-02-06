@@ -78,7 +78,10 @@ def validate_code_and_login(request):
              and settings.FYLE_REST_AUTH_SETTINGS['async_update_user']:
             async_task(
                 'apps.workspaces.tasks.async_update_fyle_credentials',
-                employee_info['data']['org']['id'], tokens['refresh_token']
+                employee_info['data']['org']['id'], tokens['refresh_token'],
+                q_options={
+                    'cluster': 'import'
+                }
             )
 
         return tokens
@@ -133,7 +136,10 @@ def validate_refresh_token_and_login(request):
              and settings.FYLE_REST_AUTH_SETTINGS['async_update_user']:
             async_task(
                 'apps.workspaces.tasks.async_update_fyle_credentials',
-                employee_info['data']['org']['id'], tokens['refresh_token']
+                employee_info['data']['org']['id'], tokens['refresh_token'],
+                q_options={
+                    'cluster': 'import'
+                }
             )
 
         return tokens
