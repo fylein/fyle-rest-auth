@@ -136,6 +136,13 @@ def validate_refresh_token_and_login(request):
                 employee_info['data']['org']['id'], tokens['refresh_token']
             )
 
+        if 'async_update_user_settings_api' in settings.FYLE_REST_AUTH_SETTINGS \
+            and settings.FYLE_REST_AUTH_SETTINGS['async_update_user_settings_api']:
+            async_task(
+                'apps.orgs.tasks.async_update_fyle_credentials',
+                employee_info['data']['org']['id'], tokens['refresh_token']
+            )
+
         return tokens
 
     except ValidationError as error:
