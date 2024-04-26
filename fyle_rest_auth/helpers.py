@@ -56,9 +56,12 @@ def validate_code_and_login(request):
         users = get_user_model()
 
         user, _ = users.objects.get_or_create(
-            user_id=employee_info['data']['user']['id'],
-            email=employee_info['data']['user']['email']
+            user_id=employee_info['data']['user']['id']
         )
+
+        if user and user.email != employee_info['data']['user']['email']:
+            user.email = employee_info['data']['user']['email']
+            user.save()
 
         AuthToken.objects.update_or_create(
             user=user,
@@ -75,7 +78,7 @@ def validate_code_and_login(request):
 
         # Update Fyle Credentials with latest healthy token
         if 'async_update_user' in settings.FYLE_REST_AUTH_SETTINGS \
-             and settings.FYLE_REST_AUTH_SETTINGS['async_update_user']:
+            and settings.FYLE_REST_AUTH_SETTINGS['async_update_user']:
             async_task(
                 'apps.workspaces.tasks.async_update_fyle_credentials',
                 employee_info['data']['org']['id'], tokens['refresh_token']
@@ -111,9 +114,12 @@ def validate_refresh_token_and_login(request):
         users = get_user_model()
 
         user, _ = users.objects.get_or_create(
-            user_id=employee_info['data']['user']['id'],
-            email=employee_info['data']['user']['email']
+            user_id=employee_info['data']['user']['id']
         )
+
+        if user and user.email != employee_info['data']['user']['email']:
+            user.email = employee_info['data']['user']['email']
+            user.save()
 
         AuthToken.objects.update_or_create(
             user=user,
@@ -130,7 +136,7 @@ def validate_refresh_token_and_login(request):
 
         # Update Fyle Credentials with latest healthy token
         if 'async_update_user' in settings.FYLE_REST_AUTH_SETTINGS \
-             and settings.FYLE_REST_AUTH_SETTINGS['async_update_user']:
+            and settings.FYLE_REST_AUTH_SETTINGS['async_update_user']:
             async_task(
                 'apps.workspaces.tasks.async_update_fyle_credentials',
                 employee_info['data']['org']['id'], tokens['refresh_token']
