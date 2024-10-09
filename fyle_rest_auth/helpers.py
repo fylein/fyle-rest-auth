@@ -53,6 +53,7 @@ def validate_code_and_login(request):
         tokens = auth.generate_fyle_refresh_token(authorization_code=authorization_code)
 
         employee_info = get_fyle_admin(tokens['access_token'], auth.get_origin_address(request))
+        logger.info('Employee Info %s', employee_info)
         users = get_user_model()
 
         user, _ = users.objects.get_or_create(
