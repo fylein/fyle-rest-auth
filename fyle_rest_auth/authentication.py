@@ -75,7 +75,7 @@ class FyleJWTAuthentication(BaseAuthentication):
         email = cache.get(email_unique_key)
         user = cache.get(user_unique_key)
 
-        logger.info('email and user unique key %s, %s', email, user)
+        logger.info('email, user unique key, email unique key %s, %s, %s', email, user_unique_key, email_unique_key)
 
         if not (email and user):
             cache.delete_many([email_unique_key, user_unique_key])
