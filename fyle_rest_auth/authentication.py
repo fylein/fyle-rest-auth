@@ -75,12 +75,13 @@ class FyleJWTAuthentication(BaseAuthentication):
         email = cache.get(email_unique_key)
         user = cache.get(user_unique_key)
 
-        logger.info('email, user unique key, email unique key %s, %s, %s', email, user_unique_key, email_unique_key)
+        logger.info('email, user unique key, email unique key user %s, %s, %s, %s', email, user_unique_key, email_unique_key, user)
 
         if not (email and user):
             cache.delete_many([email_unique_key, user_unique_key])
             try:
                 employee_info = get_fyle_admin(access_token_string.split(' ')[1], origin_address)
+                logger.info('employee_info %s', employee_info)
             except Exception:
                 raise AuthenticationFailed('Invalid access token')
 
