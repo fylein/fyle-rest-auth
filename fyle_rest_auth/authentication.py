@@ -37,9 +37,9 @@ class FyleJWTAuthentication(BaseAuthentication):
             user = User.objects.get(email=user['email'], user_id=user['user_id'])
             AuthToken.objects.get(user=user)
         except User.DoesNotExist:
-            raise ValidationError('User not found for this token')
+            raise ValidationError('User not found for this token') from None
         except AuthToken.DoesNotExist:
-            raise ValidationError('Login details not found for the user')
+            raise ValidationError('Login details not found for the user') from None
 
         return user, None
 
@@ -86,7 +86,7 @@ class FyleJWTAuthentication(BaseAuthentication):
                 employee_info = get_fyle_admin(access_token_string.split(' ')[1], origin_address)
                 logger.info('employee_info %s', employee_info)
             except Exception:
-                raise AuthenticationFailed('Invalid access token')
+                raise AuthenticationFailed('Invalid access token') from None
 
             cache.set(email_unique_key, employee_info['data']['user']['email'])
             cache.set(user_unique_key, employee_info['data']['user']['id'])
