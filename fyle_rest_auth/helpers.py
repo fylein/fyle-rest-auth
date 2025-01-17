@@ -41,7 +41,7 @@ def get_cluster_domain_by_code(request):
 
     except Exception as error:
         logger.error(traceback.format_exc())
-        raise ValidationError(error)
+        raise ValidationError(error) from error
 
 
 def validate_code_and_login(request):
@@ -93,7 +93,7 @@ def validate_code_and_login(request):
 
     except Exception as error:
         logger.error(traceback.format_exc())
-        raise ValidationError(error)
+        raise ValidationError(error) from error
 
 
 def validate_refresh_token_and_login(request):
@@ -158,7 +158,7 @@ def validate_refresh_token_and_login(request):
 
     except Exception as error:
         logger.error(traceback.format_exc())
-        raise ValidationError(error)
+        raise ValidationError(error) from error
 
 
 def validate_and_refresh_token(request):
@@ -195,7 +195,7 @@ def validate_and_refresh_token(request):
 
     except Exception as error:
         logger.error(traceback.format_exc())
-        raise ValidationError(error)
+        raise ValidationError(error) from error
 
 
 def get_cluster_domain(access_token: str, origin_address: str = None) -> str:
