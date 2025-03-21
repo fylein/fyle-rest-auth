@@ -134,6 +134,7 @@ def validate_refresh_token_and_login(request):
         tokens['user']['full_name'] = employee_info['data']['user']['full_name']
         tokens['user']['org_id'] = employee_info['data']['org']['id']
         tokens['user']['org_name'] = employee_info['data']['org']['name']
+        tokens['refresh_token'] = refresh_token
 
         # Update Fyle Credentials with latest healthy token
         if 'async_update_user' in settings.FYLE_REST_AUTH_SETTINGS \
