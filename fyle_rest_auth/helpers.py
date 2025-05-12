@@ -62,7 +62,7 @@ def validate_code_and_login(request):
 
         if user and user.email != employee_info['data']['user']['email']:
             user.email = employee_info['data']['user']['email']
-            user.full_name = employee_info['data']['user']['email']
+            user.full_name = employee_info['data']['user']['full_name']
             user.save()
 
         AuthToken.objects.update_or_create(
