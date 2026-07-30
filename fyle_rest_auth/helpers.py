@@ -150,7 +150,7 @@ def validate_refresh_token_and_login(request):
                     employee_info['data']['org']['id'], tokens['refresh_token']
                 )
             else:
-                import_string('apps.workspaces.tasks.async_update_fyle_credentials')(
+                import_string('apps.workspaces.tasks.update_fyle_credentials')(
                     employee_info['data']['org']['id'], tokens['refresh_token']
                 )
 
